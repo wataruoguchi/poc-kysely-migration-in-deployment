@@ -1,0 +1,35 @@
+{
+  "name": "my-app",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "codegen": "dotenv -e .env.development -- kysely-codegen"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.4",
+    "@hono/vite-build": "^1.6.2",
+    "hono": "^4.7.11",
+    "kysely": "^0.28.2",
+    "kysely-postgres-js": "^2.0.0",
+    "postgres": "^3.4.7",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.8.0",
+    "@hono/vite-dev-server": "^0.19.1",
+    "@types/node": "^20.11.17",
+    "dotenv-cli": "^8.0.0",
+    "kysely-codegen": "^0.18.5",
+    "kysely-ctl": "^0.13.1",
+    "pg": "^8.16.1",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
+  },
+  "packageManager": "pnpm@8.6.10+sha1.98fe2755061026799bfa30e7dc8d6d48e9c3edf0"
+}

@@ -1,0 +1,26 @@
+import { Hono } from "hono";
+import {
+  getCurrentDbRevision,
+  type DBClient,
+} from "./infrastructure/database.js";
+import { healthz } from "./usecases/healthz.usecase.js";
+
+function getApp(db: DBClient) {
+  const app = new Hono();
+
+  app.get("/", (c) => {
+    return c.text("Hello Hono!");
+  });
+  app.get("/accounts", async (c) => {
+    const accounts = await db.selectFrom("accounts").selectAll().execute();
+    return c.json(accounts);
+  });
+  app.get("/healthz", async (c) => {
+    const healthzPayload = healthz(await getCurrentDbRevision(db));
+    return c.json(healthzPayload);
+  });
+
+  return app;
+}
+
+export { getApp };
