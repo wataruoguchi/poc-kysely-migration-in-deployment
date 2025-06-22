@@ -7,7 +7,8 @@ const envSchema = z.object({
   PGUSER: z.string(),
   PGPASSWORD: z.string(),
   PORT: z.coerce.number(),
-});
+})
+
+export const getEnv = () => envSchema.parse(process.env);
 
 export type Env = z.infer<typeof envSchema>;
-export const env = envSchema.parse(process.env);

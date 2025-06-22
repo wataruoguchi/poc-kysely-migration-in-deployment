@@ -1,0 +1,47 @@
+# Build stage
+FROM node:20-bookworm-slim AS builder
+
+WORKDIR /app
+
+# Install the exact pnpm version from package.json
+RUN npm i -g pnpm@^8.6.10
+
+# Copy package files for dependency installation
+COPY . .
+
+WORKDIR /app/my-app
+# Install all dependencies (including dev dependencies for building)
+RUN pnpm install
+
+# Build the application with tsc (not Vite)
+RUN pnpm build:prod
+
+# Production stage
+FROM node:20-bookworm-slim AS production
+
+WORKDIR /app
+
+# Install the exact pnpm version from package.json
+RUN npm i -g pnpm@^8.6.10
+
+# Install tini for proper signal handling
+RUN apt-get update && apt-get install -y tini && rm -rf /var/lib/apt/lists/*
+
+# Copy package files for dependency installation
+COPY --from=builder /app/my-app/package.json ./
+COPY --from=builder /app/my-app/pnpm-lock.yaml ./
+
+# Install only production dependencies
+RUN pnpm install --prod
+
+# Copy built application from builder stage
+COPY --from=builder /app/my-app/dist ./dist
+
+# Copy any necessary runtime files (like database migrations if needed)
+COPY --from=builder /app/my-app/db ./db
+
+# Use tini as the init system
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+# Start the application
+CMD ["node", "dist/index.js"]

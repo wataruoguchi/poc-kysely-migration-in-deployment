@@ -1,4 +1,3 @@
-import build from "@hono/vite-build/node";
 import devServer from "@hono/vite-dev-server";
 import nodeAdapter from "@hono/vite-dev-server/node";
 import fs from "node:fs";
@@ -28,16 +27,7 @@ export default defineConfig(({ command, mode }) => {
   }
 
   if (command === "build") {
-    return {
-      ...defaultConfig,
-      plugins: [
-        tsConfigPaths(),
-        build({
-          entry: "./src/index.ts",
-          port,
-        }),
-      ],
-    };
+    throw new Error("Vite is not supported for production builds. Use tsc instead.");
   }
 
   return {

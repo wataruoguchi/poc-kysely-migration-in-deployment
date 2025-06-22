@@ -1,0 +1,25 @@
+FROM node:20-bookworm-slim
+
+WORKDIR /app
+
+# Install tini and clean up
+RUN apt-get update && apt-get install -y tini && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install pnpm globally
+RUN npm i -g pnpm@^8.6.10
+
+# Copy package files first for better layer caching
+COPY . .
+
+WORKDIR /app/my-app
+
+# Install dependencies
+RUN pnpm install
+
+# Set environment
+ENV NODE_ENV=production
+
+# Use tini for proper signal handling
+ENTRYPOINT ["/usr/bin/tini", "--", "npx"]
+CMD ["kysely-ctl", "migrate", "up"]

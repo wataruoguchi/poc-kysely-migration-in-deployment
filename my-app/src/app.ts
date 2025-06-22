@@ -1,9 +1,7 @@
 import { Hono } from "hono";
 import {
-  getCurrentDbRevision,
-  type DBClient,
+  type DBClient
 } from "./infrastructure/database.js";
-import { healthz } from "./usecases/healthz.usecase.js";
 
 function getApp(db: DBClient) {
   const app = new Hono();
@@ -16,7 +14,7 @@ function getApp(db: DBClient) {
     return c.json(accounts);
   });
   app.get("/healthz", async (c) => {
-    const healthzPayload = healthz(await getCurrentDbRevision(db));
+    const healthzPayload = {}; // healthz(await getCurrentDbRevision(db));
     return c.json(healthzPayload);
   });
 

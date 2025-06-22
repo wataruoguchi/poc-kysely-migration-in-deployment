@@ -2,15 +2,15 @@ import { Kysely, Migrator } from "kysely";
 import type { DB } from "kysely-codegen";
 import { PostgresJSDialect } from "kysely-postgres-js";
 import postgres from "postgres";
-import { env } from "../shared/env.js";
+import { getEnv } from "../shared/env.js";
 import { ESMFileMigrationProvider } from "./kysely/ESMFileMigrationProvider.js";
 
 const sql = postgres({
-  host: env.PGHOST,
-  port: env.PGPORT,
-  database: env.PGDATABASE,
-  username: env.PGUSER,
-  password: env.PGPASSWORD,
+  host: getEnv().PGHOST,
+  port: getEnv().PGPORT,
+  database: getEnv().PGDATABASE,
+  username: getEnv().PGUSER,
+  password: getEnv().PGPASSWORD,
 });
 
 export const dialect = new PostgresJSDialect({
@@ -21,11 +21,11 @@ export function connectDb(name?: string): DBClient {
   return new Kysely<DB>({
     dialect: new PostgresJSDialect({
       postgres: postgres({
-        host: env.PGHOST,
-        port: env.PGPORT,
-        database: name ?? env.PGDATABASE,
-        username: env.PGUSER,
-        password: env.PGPASSWORD,
+        host: getEnv().PGHOST,
+        port: getEnv().PGPORT,
+        database: name ?? getEnv().PGDATABASE,
+        username: getEnv().PGUSER,
+        password: getEnv().PGPASSWORD,
       }),
     }),
   });
