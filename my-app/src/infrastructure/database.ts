@@ -5,18 +5,6 @@ import postgres from "postgres";
 import { getEnv } from "../shared/env.js";
 import { ESMFileMigrationProvider } from "./kysely/ESMFileMigrationProvider.js";
 
-const sql = postgres({
-  host: getEnv().PGHOST,
-  port: getEnv().PGPORT,
-  database: getEnv().PGDATABASE,
-  username: getEnv().PGUSER,
-  password: getEnv().PGPASSWORD,
-});
-
-export const dialect = new PostgresJSDialect({
-  postgres: sql,
-});
-
 export function connectDb(name?: string): DBClient {
   return new Kysely<DB>({
     dialect: new PostgresJSDialect({
