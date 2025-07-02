@@ -1,4 +1,3 @@
-import build from "@hono/vite-build/node";
 import devServer from "@hono/vite-dev-server";
 import nodeAdapter from "@hono/vite-dev-server/node";
 import fs from "node:fs";
@@ -9,10 +8,6 @@ import tsConfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig(({ command, mode }) => {
   const port = mode === "test" ? 3000 : getPort();
-  const defaultConfig = {
-    plugins: [tsConfigPaths()],
-  };
-
   let httpsOptions: { key: Buffer; cert: Buffer } | undefined;
   try {
     httpsOptions = {
@@ -28,16 +23,11 @@ export default defineConfig(({ command, mode }) => {
   }
 
   if (command === "build") {
-    return {
-      ...defaultConfig,
-      plugins: [
-        tsConfigPaths(),
-        build({
-          entry: "./src/index.ts",
-          port,
-        }),
-      ],
-    };
+    throw new Error(
+      "The `vite build` command is not supported for production builds in this project. "
+      + "Please use the TypeScript compiler (`tsc`) or the dedicated production build script instead. "
+      + "Refer to the project documentation for more details."
+    );
   }
 
   return {

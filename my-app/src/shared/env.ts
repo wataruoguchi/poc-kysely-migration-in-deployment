@@ -9,5 +9,6 @@ const envSchema = z.object({
   PORT: z.coerce.number(),
 });
 
+export const getEnv = () => envSchema.parse(process.env);
+
 export type Env = z.infer<typeof envSchema>;
-export const env = envSchema.parse(process.env);

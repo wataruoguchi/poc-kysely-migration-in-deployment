@@ -1,0 +1,49 @@
+# 1. Build stage
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install pnpm globally
+RUN npm i -g pnpm@^8.6.10
+
+# Copy workspace files for dependency installation
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
+COPY package.json ./
+COPY my-app/package.json ./my-app/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+WORKDIR /app/my-app
+
+# Copy source code
+COPY my-app/src ./src
+COPY my-app/tsconfig*.json ./
+
+# Add esbuild
+RUN pnpm build:prod
+
+# 2. Production stage
+FROM node:20-alpine AS production
+
+# Install tini for proper signal handling
+RUN apk add --no-cache tini
+
+WORKDIR /app
+
+# Create a non-root user
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -S -D -H -h /app -s /sbin/nologin -G appgroup -g appgroup appuser
+
+# Copy built application from builder stage
+COPY --from=builder --chown=appuser:appgroup /app/my-app/dist ./dist
+
+# Switch to the non-root user
+USER appuser
+
+# Use tini as the init system
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Start the application
+CMD ["node", "dist/bundle.js"]

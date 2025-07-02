@@ -1,8 +1,5 @@
 import { Hono } from "hono";
-import {
-  getCurrentDbRevision,
-  type DBClient,
-} from "./infrastructure/database.js";
+import { type DBClient } from "./infrastructure/database.js";
 import { healthz } from "./usecases/healthz.usecase.js";
 
 function getApp(db: DBClient) {
@@ -16,8 +13,17 @@ function getApp(db: DBClient) {
     return c.json(accounts);
   });
   app.get("/healthz", async (c) => {
-    const healthzPayload = healthz(await getCurrentDbRevision(db));
-    return c.json(healthzPayload);
+    try {
+      const dbMigrationName = await db
+        .selectFrom("kysely_migration")
+        .select("name")
+        .executeTakeFirstOrThrow();
+      const revision = (dbMigrationName?.name || "").split("_")[0];
+      const healthzPayload = healthz(revision);
+      return c.json(healthzPayload);
+    } catch (e) {
+      return c.json({ error: "Database connection failed" }, 500);
+    }
   });
 
   return app;

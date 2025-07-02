@@ -18,12 +18,11 @@ export class ESMFileMigrationProvider implements MigrationProvider {
     console.log(`Found ${files.length} migrations in ${resolvedPath}`);
 
     for (const fileName of files) {
-      const importPath = path
-        .join(this.relativePath, fileName)
-        .replaceAll("\\", "/");
-      const migration = await import(`./${importPath}`);
       const migrationKey = fileName.substring(0, fileName.lastIndexOf("."));
 
+      // Use a helper function to resolve the import path for compatibility
+      const migrationPath = path.join(resolvedPath, fileName);
+      const migration = await import(migrationPath);
       migrations[migrationKey] = migration;
     }
 

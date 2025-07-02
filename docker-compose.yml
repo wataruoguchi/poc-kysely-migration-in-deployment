@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:14-alpine
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  migrate:
+    build:
+      dockerfile: ./Dockerfile.migration
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGPORT: 5432
+      PGHOST: db
+      PGUSER: postgres
+      PGDATABASE: postgres
+      PGPASSWORD: postgres
+    restart: 'no'
+
+  app:
+    build:
+      dockerfile: ./Dockerfile.deployment
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: development
+      APP_NAME: programtracker
+      PORT: 3000
+      PGPORT: 5432
+      PGHOST: db
+      PGUSER: postgres
+      PGDATABASE: postgres
+      PGPASSWORD: postgres
+    ports:
+      - 3000:3000
+
+volumes:
+  postgres_data:
