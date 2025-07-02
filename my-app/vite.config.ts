@@ -24,7 +24,9 @@ export default defineConfig(({ command, mode }) => {
 
   if (command === "build") {
     throw new Error(
-      "Vite is not supported for production builds. Use tsc instead.",
+      "The `vite build` command is not supported for production builds in this project. "
+      + "Please use the TypeScript compiler (`tsc`) or the dedicated production build script instead. "
+      + "Refer to the project documentation for more details."
     );
   }
 
