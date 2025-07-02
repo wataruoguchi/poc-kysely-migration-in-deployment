@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { type DBClient } from "./infrastructure/database.js";
 import { healthz } from "./usecases/healthz.usecase.js";
 
+let revision: string | null = null;
 function getApp(db: DBClient) {
   const app = new Hono();
 
@@ -14,11 +15,13 @@ function getApp(db: DBClient) {
   });
   app.get("/healthz", async (c) => {
     try {
-      const dbMigrationName = await db
-        .selectFrom("kysely_migration")
-        .select("name")
-        .executeTakeFirstOrThrow();
-      const revision = (dbMigrationName?.name || "").split("_")[0];
+      if (revision === null) {
+        const dbMigrationName = await db
+          .selectFrom("kysely_migration")
+          .select("name")
+          .executeTakeFirstOrThrow();
+        revision = (dbMigrationName?.name || "").split("_")[0];
+      }
       const healthzPayload = healthz(revision);
       return c.json(healthzPayload);
     } catch (e) {
