@@ -1,15 +1,18 @@
 import { defineConfig } from "kysely-ctl";
 import { PostgresJSDialect } from "kysely-postgres-js";
 import postgres from "postgres";
-import { getEnv } from "../src/shared/env.js";
+import { z } from "zod";
 
-const sql = postgres({
-  host: getEnv().PGHOST,
-  port: getEnv().PGPORT,
-  database: getEnv().PGDATABASE,
-  username: getEnv().PGUSER,
-  password: getEnv().PGPASSWORD,
-});
+const getEnv = () =>
+  z
+    .object({
+      PGHOST: z.string(),
+      PGPORT: z.coerce.number(),
+      PGDATABASE: z.string(),
+      PGUSER: z.string(),
+      PGPASSWORD: z.string(),
+    })
+    .parse(process.env);
 
 const dialect = new PostgresJSDialect({
   postgres: postgres({

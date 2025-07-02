@@ -1,8 +1,8 @@
 import { Kysely, Migrator } from "kysely";
-import type { DB } from "kysely-codegen";
 import { PostgresJSDialect } from "kysely-postgres-js";
 import postgres from "postgres";
 import { getEnv } from "../shared/env.js";
+import type { DB } from "./db.d.ts";
 import { ESMFileMigrationProvider } from "./kysely/ESMFileMigrationProvider.js";
 
 export function connectDb(name?: string): DBClient {

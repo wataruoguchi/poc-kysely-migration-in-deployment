@@ -1,47 +1,49 @@
-# Build stage
-FROM node:20-bookworm-slim AS builder
+# 1. Build stage
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install the exact pnpm version from package.json
+# Install pnpm globally
 RUN npm i -g pnpm@^8.6.10
 
-# Copy package files for dependency installation
-COPY . .
+# Copy workspace files for dependency installation
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
+COPY package.json ./
+COPY my-app/package.json ./my-app/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
 
 WORKDIR /app/my-app
-# Install all dependencies (including dev dependencies for building)
-RUN pnpm install
 
-# Build the application with tsc (not Vite)
+# Copy source code
+COPY my-app/src ./src
+COPY my-app/tsconfig*.json ./
+
+# Add esbuild
 RUN pnpm build:prod
 
-# Production stage
-FROM node:20-bookworm-slim AS production
+# 2. Production stage
+FROM node:20-alpine AS production
+
+# Install tini for proper signal handling
+RUN apk add --no-cache tini
 
 WORKDIR /app
 
-# Install the exact pnpm version from package.json
-RUN npm i -g pnpm@^8.6.10
-
-# Install tini for proper signal handling
-RUN apt-get update && apt-get install -y tini && rm -rf /var/lib/apt/lists/*
-
-# Copy package files for dependency installation
-COPY --from=builder /app/my-app/package.json ./
-COPY --from=builder /app/my-app/pnpm-lock.yaml ./
-
-# Install only production dependencies
-RUN pnpm install --prod
+# Create a non-root user
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -S -D -H -h /app -s /sbin/nologin -G appgroup -g appgroup appuser
 
 # Copy built application from builder stage
-COPY --from=builder /app/my-app/dist ./dist
+COPY --from=builder --chown=appuser:appgroup /app/my-app/dist ./dist
 
-# Copy any necessary runtime files (like database migrations if needed)
-COPY --from=builder /app/my-app/db ./db
+# Switch to the non-root user
+USER appuser
 
 # Use tini as the init system
-ENTRYPOINT ["/usr/bin/tini", "--"]
+ENTRYPOINT ["/sbin/tini", "--"]
 
 # Start the application
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/bundle.js"]

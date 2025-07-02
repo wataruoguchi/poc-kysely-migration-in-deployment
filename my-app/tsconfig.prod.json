@@ -5,5 +5,11 @@
     "skipLibCheck": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["src/tests/**/*", ".config/**/*", "node_modules", "**/*.spec.ts", "**/*.test.ts"]
-} 
+  "exclude": [
+    "src/tests/**/*",
+    ".config/**/*",
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
+}

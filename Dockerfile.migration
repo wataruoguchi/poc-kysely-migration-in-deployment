@@ -1,25 +1,29 @@
-FROM node:20-bookworm-slim
+# One-off image for running migrations
+FROM node:20-alpine
+
+# Install tini for proper signal handling
+RUN apk add --no-cache tini
 
 WORKDIR /app
-
-# Install tini and clean up
-RUN apt-get update && apt-get install -y tini && \
-    rm -rf /var/lib/apt/lists/*
 
 # Install pnpm globally
 RUN npm i -g pnpm@^8.6.10
 
-# Copy package files first for better layer caching
-COPY . .
+# Copy workspace files for dependency installation
+COPY pnpm-workspace.yaml ./
+COPY pnpm-lock.yaml ./
+COPY package.json ./
+COPY my-app/package.json ./my-app/
+
+# Copy migration files
+COPY my-app/.config ./my-app/.config
+COPY my-app/db ./my-app/db
 
 WORKDIR /app/my-app
 
 # Install dependencies
-RUN pnpm install
-
-# Set environment
-ENV NODE_ENV=production
+RUN pnpm install --frozen-lockfile
 
 # Use tini for proper signal handling
-ENTRYPOINT ["/usr/bin/tini", "--", "npx"]
+ENTRYPOINT ["/sbin/tini", "--", "npx"]
 CMD ["kysely-ctl", "migrate", "up"]

@@ -8,10 +8,6 @@ import tsConfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig(({ command, mode }) => {
   const port = mode === "test" ? 3000 : getPort();
-  const defaultConfig = {
-    plugins: [tsConfigPaths()],
-  };
-
   let httpsOptions: { key: Buffer; cert: Buffer } | undefined;
   try {
     httpsOptions = {
@@ -27,7 +23,9 @@ export default defineConfig(({ command, mode }) => {
   }
 
   if (command === "build") {
-    throw new Error("Vite is not supported for production builds. Use tsc instead.");
+    throw new Error(
+      "Vite is not supported for production builds. Use tsc instead.",
+    );
   }
 
   return {
