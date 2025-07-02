@@ -6,14 +6,22 @@ import type { DB } from "./db.d.ts";
 import { ESMFileMigrationProvider } from "./kysely/ESMFileMigrationProvider.js";
 
 export function connectDb(name?: string): DBClient {
+  const {
+    PGHOST: host,
+    PGPORT: port,
+    PGDATABASE: database,
+    PGUSER: username,
+    PGPASSWORD: password,
+  } = getEnv();
+
   return new Kysely<DB>({
     dialect: new PostgresJSDialect({
       postgres: postgres({
-        host: getEnv().PGHOST,
-        port: getEnv().PGPORT,
-        database: name ?? getEnv().PGDATABASE,
-        username: getEnv().PGUSER,
-        password: getEnv().PGPASSWORD,
+        host,
+        port,
+        database: name ?? database,
+        username,
+        password,
       }),
     }),
   });
