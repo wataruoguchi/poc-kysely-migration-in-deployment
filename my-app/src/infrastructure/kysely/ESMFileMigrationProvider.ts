@@ -20,9 +20,9 @@ export class ESMFileMigrationProvider implements MigrationProvider {
     for (const fileName of files) {
       const migrationKey = fileName.substring(0, fileName.lastIndexOf("."));
 
-      // Use a more specific import pattern that Vite can handle
-      const migration = await import(`${resolvedPath}/${fileName}`); // TODO: Something is wrong with the import path, it's not working in production. Perhaps it should not be shared between dev and prod.
-
+      // Use a helper function to resolve the import path for compatibility
+      const migrationPath = path.join(resolvedPath, fileName);
+      const migration = await import(migrationPath);
       migrations[migrationKey] = migration;
     }
 
