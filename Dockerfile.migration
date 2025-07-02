@@ -25,5 +25,5 @@ WORKDIR /app/my-app
 RUN pnpm install --frozen-lockfile
 
 # Use tini for proper signal handling
-ENTRYPOINT ["/sbin/tini", "--", "npx"]
-CMD ["kysely-ctl", "migrate", "up"]
+ENTRYPOINT ["/sbin/tini", "--", "/bin/sh"]
+CMD ["-c", "npx kysely-ctl migrate:up && npx kysely-ctl seed:run"]
